@@ -30,8 +30,8 @@ AWS Resource Optimizer is a tool designed to help DevOps teams monitor, analyze,
 
 Example crontab configuration:
 ```
-# Run EC2 RI coverage analysis every Monday at 8 AM
-0 8 * * 1 cd /path/to/aws-resource-optimizer && python src/run_ri_analysis.py >> /var/log/aws-optimizer/ri-analysis.log 2>&1
+# Run EC2 RI coverage analysis every month
+0 8 1 * * cd /path/to/aws-resource-optimizer && python src/run_ri_analysis.py 2>&1
 ```
 
 ## Project Structure
