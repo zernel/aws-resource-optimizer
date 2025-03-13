@@ -15,6 +15,9 @@ ri_analysis:
   regions:
     - us-east-1
     - us-west-2
+  # AWS configuration for the analyzer
+  aws:
+    profile: default
 
 # Notification Configuration
 notifications:
@@ -25,6 +28,8 @@ notifications:
     icon_emoji: ":money_with_wings:"
     # Enable/disable notifications
     enabled: true
+    # Additional information for the notification
+    additional_info: "For more details, please see the full report: https://wiki.example.com/aws/ri-reports"
 
 # Reporting Configuration
 reporting:

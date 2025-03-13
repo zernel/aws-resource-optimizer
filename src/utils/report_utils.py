@@ -162,6 +162,13 @@ def generate_markdown_report(report_data):
     markdown = f"# EC2 Reserved Instance Coverage Report\n\n"
     markdown += f"Inspection Time: {timestamp}\n\n"
     
+    # Get soonest expiring RI info
+    summary = report_data.get('summary', {})
+    soonest_ri = summary.get('soonest_expiring_ri')
+    
+    if soonest_ri:
+        markdown += f"**Next RI Expiration:** {soonest_ri['type']} in {soonest_ri['region_name']} will expire on {soonest_ri['date']}\n\n"
+    
     # Add region sections
     for region_data in report_data.get('regions_data', []):
         region_name = region_data.get('region_name', region_data.get('region', 'Unknown Region'))
@@ -195,7 +202,10 @@ def generate_markdown_report(report_data):
             markdown += "| Instance Type | Count | Expiration Date |\n"
             markdown += "|---------|------|--------|\n"
             
-            for ri in ri_details:
+            # Sort RIs by expiration date
+            sorted_ris = sorted(ri_details, key=lambda x: x.get('end_date', '9999-12-31'))
+            
+            for ri in sorted_ris:
                 instance_type = ri.get('type', 'Unknown')
                 count = ri.get('count', 0)
                 end_date = ri.get('end_date', 'Unknown')
@@ -205,7 +215,6 @@ def generate_markdown_report(report_data):
         markdown += "\n"
     
     # Add summary section
-    summary = report_data.get('summary', {})
     total_instances = summary.get('total_instances', 0)
     total_ris = summary.get('total_reserved_instances', 0)
     overall_coverage = summary.get('overall_coverage_percentage', 0)

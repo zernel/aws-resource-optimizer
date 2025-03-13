@@ -74,6 +74,18 @@ class RICoverageAnalyzer:
         ri_counts = reserved_instances['count_by_type']
         ri_details = reserved_instances['details']
         
+        # Find the soonest expiring RI
+        soonest_expiry = None
+        if ri_details:
+            # Sort by end_date and get the first one
+            sorted_ris = sorted(ri_details, key=lambda x: x.get('end_date', '9999-12-31'))
+            if sorted_ris:
+                soonest_expiry = {
+                    'type': sorted_ris[0].get('type'),
+                    'date': sorted_ris[0].get('end_date'),
+                    'id': sorted_ris[0].get('id')
+                }
+        
         # Count running instances by type
         running_counts = {instance_type: len(instances) for instance_type, instances in running_instances.items()}
         
@@ -113,7 +125,8 @@ class RICoverageAnalyzer:
             'running_counts_by_type': running_counts,
             'ri_counts_by_type': ri_counts,
             'uncovered_by_type': uncovered_instances,
-            'ri_details': ri_details
+            'ri_details': ri_details,
+            'soonest_expiring_ri': soonest_expiry  # Add the soonest expiring RI
         }
     
     def analyze_region(self, region):
@@ -201,7 +214,8 @@ class RICoverageAnalyzer:
             'summary': {
                 'total_instances': 0,
                 'total_reserved_instances': 0,
-                'total_uncovered_instances': 0
+                'total_uncovered_instances': 0,
+                'soonest_expiring_ri': None  # Add field for soonest expiring RI
             }
         }
         
@@ -213,6 +227,16 @@ class RICoverageAnalyzer:
             report['summary']['total_instances'] += region_data['total_instances']
             report['summary']['total_reserved_instances'] += region_data['total_reserved_instances']
             report['summary']['total_uncovered_instances'] += region_data['uncovered_instances']
+            
+            # Keep track of the soonest expiring RI across all regions
+            if region_data.get('soonest_expiring_ri') and (
+                not report['summary']['soonest_expiring_ri'] or 
+                region_data['soonest_expiring_ri']['date'] < report['summary']['soonest_expiring_ri']['date']):
+                report['summary']['soonest_expiring_ri'] = {
+                    **region_data['soonest_expiring_ri'],
+                    'region': region,
+                    'region_name': region_data['region_name']
+                }
         
         # Calculate overall coverage percentage
         total_instances = report['summary']['total_instances']

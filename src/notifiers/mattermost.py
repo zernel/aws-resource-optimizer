@@ -50,6 +50,9 @@ class MattermostNotifier:
         total_uncovered = summary.get('total_uncovered_instances', 0)
         overall_coverage = summary.get('overall_coverage_percentage', 0)
         
+        # Get soonest expiring RI info
+        soonest_ri = summary.get('soonest_expiring_ri')
+        
         # Determine status icon based on coverage percentage
         status_icon = "✅" if overall_coverage >= 80 else "⚠️" if overall_coverage >= 50 else "❌"
         
@@ -64,7 +67,13 @@ class MattermostNotifier:
         text += f"| Running EC2 Instances | **{total_instances}** |\n"
         text += f"| Active Reserved Instances | **{total_ris}** |\n"
         text += f"| Uncovered Instances | **{total_uncovered}** |\n"
-        text += f"| Overall Coverage | {status_icon} **{overall_coverage:.1f}%** |\n\n"
+        text += f"| Overall Coverage | {status_icon} **{overall_coverage:.1f}%** |\n"
+        
+        # Add soonest expiring RI if available
+        if soonest_ri:
+            text += f"| Next RI Expiry | ⏰ **{soonest_ri['type']}** in **{soonest_ri['region_name']}** on **{soonest_ri['date']}** |\n\n"
+        else:
+            text += f"| Next RI Expiry | No active RIs |\n\n"
         
         # Add region details in a table format
         text += "#### Region Details\n"
@@ -82,6 +91,10 @@ class MattermostNotifier:
             if region_instances > 0:
                 region_status = "✅" if region_coverage >= 80 else "⚠️" if region_coverage >= 50 else "❌"
                 text += f"| {region_name} | {region_instances} | {region_ris} | {region_uncovered} | {region_status} {region_coverage:.1f}% |\n"
+        
+        # Add additional info from configuration if available
+        if self.config.get('additional_info'):
+            text += f"\n\n{self.config['additional_info']}\n"
         
         logger.debug("Formatted enhanced message for Mattermost")
         return text
