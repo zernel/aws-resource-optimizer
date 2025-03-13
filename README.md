@@ -10,24 +10,9 @@ AWS Resource Optimizer is a tool designed to help DevOps teams monitor, analyze,
 
 ### EC2 Reserved Instance Coverage Analysis
 - Scheduled analysis of EC2 Reserved Instance coverage across your AWS accounts
-- Detailed reports showing potential savings opportunities
+- Detailed reports showing running instances and RI coverage by region
 - Automated notifications to Mattermost channels
-- Historical trend analysis to track optimization progress
-- Recommendations for new Reserved Instance purchases
-
-## Planned Features (in future releases)
-
-### Automated Instance Management
-- Smart scheduling for non-production environments
-- Automatic shutdown of development and testing instances during off-hours
-- Customizable schedules based on team working hours
-- Override mechanisms for special cases
-
-### Storage Optimization
-- Detection and cleanup of orphaned EBS volumes
-- Identification of unused snapshots and AMIs
-- Automated lifecycle policies for resource management
-- Cost impact reports for storage resources
+- Simple overview of uncovered instances that could benefit from RI purchases
 
 ## Setup
 
@@ -40,7 +25,7 @@ AWS Resource Optimizer is a tool designed to help DevOps teams monitor, analyze,
 ### Installation
 1. Clone this repository to your server
 2. Install required dependencies: `pip install -r requirements.txt`
-3. Configure AWS credentials and settings in `config/settings.yaml`
+3. Configure AWS credentials and settings in `config/settings.yaml` (see `config/settings.yaml.sample`)
 4. Set up crontab job to run the analyzer scripts
 
 Example crontab configuration:

@@ -1,0 +1,5 @@
+config/settings.yaml
+.DS_Store
+*/*/__pycache__
+logs/*
+reports/*

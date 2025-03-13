@@ -1,0 +1,36 @@
+# AWS Configuration
+aws:
+  regions:
+    - us-east-1
+    - us-west-2
+  profile: default
+  # Optional: Assume role for cross-account access
+  assume_role_arn: ""
+
+# Reserved Instance Analysis Configuration
+ri_analysis:
+  # Look back period for usage analysis (in days)
+  lookback_days: 30
+  # Regions to analyze (uses aws.regions if not specified)
+  regions:
+    - us-east-1
+    - us-west-2
+
+# Notification Configuration
+notifications:
+  mattermost:
+    webhook_url: "https://chat.example.com/hooks/your-webhook-id"
+    channel: "aws-cost-optimization"
+    username: "AWS Resource Optimizer"
+    icon_emoji: ":money_with_wings:"
+    # Enable/disable notifications
+    enabled: true
+
+# Reporting Configuration
+reporting:
+  # Output formats: csv, html, json
+  formats:
+    - csv
+    - html
+  # Directory to store reports (relative to project root)
+  output_dir: "reports"
