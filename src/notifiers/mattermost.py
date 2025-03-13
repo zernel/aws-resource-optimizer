@@ -8,7 +8,7 @@ through webhook integrations.
 import json
 import logging
 import requests
-from ..utils import report_utils
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -32,35 +32,66 @@ class MattermostNotifier:
     def format_ri_coverage_message(self, report_data):
         """
         Format RI coverage analysis data into a Mattermost message.
+        Only include summary information.
         
         Args:
             report_data (dict): The RI coverage report data
             
         Returns:
-            dict: Formatted message object
+            str: Formatted text message
         """
-        # Generate markdown report
-        markdown_content = report_utils.generate_markdown_report(report_data)
+        # Convert timestamp to readable format
+        timestamp = datetime.fromisoformat(report_data['timestamp']).strftime('%Y-%m-%d %H:%M UTC')
         
-        # Create message payload for Mattermost
-        message = {
-            'text': markdown_content,
-            'username': self.username,
-            'icon_emoji': self.icon_emoji
-        }
+        # Get summary data
+        summary = report_data.get('summary', {})
+        total_instances = summary.get('total_instances', 0)
+        total_ris = summary.get('total_reserved_instances', 0)
+        total_uncovered = summary.get('total_uncovered_instances', 0)
+        overall_coverage = summary.get('overall_coverage_percentage', 0)
         
-        if self.channel:
-            message['channel'] = self.channel
+        # Determine status icon based on coverage percentage
+        status_icon = "✅" if overall_coverage >= 80 else "⚠️" if overall_coverage >= 50 else "❌"
         
-        logger.debug("Formatted Mattermost message for RI coverage report")
-        return message
+        # Build a nicely formatted message
+        text = "### EC2 Reserved Instance Coverage Report\n\n"
+        text += f"**Date:** {timestamp}\n\n"
+        
+        # Summary section with highlighting
+        text += "#### Summary\n"
+        text += f"| Metric | Value |\n"
+        text += f"|--------|-------|\n"
+        text += f"| Running EC2 Instances | **{total_instances}** |\n"
+        text += f"| Active Reserved Instances | **{total_ris}** |\n"
+        text += f"| Uncovered Instances | **{total_uncovered}** |\n"
+        text += f"| Overall Coverage | {status_icon} **{overall_coverage:.1f}%** |\n\n"
+        
+        # Add region details in a table format
+        text += "#### Region Details\n"
+        text += "| Region | Running | RIs | Uncovered | Coverage |\n"
+        text += "|--------|---------|-----|-----------|----------|\n"
+        
+        for region_data in report_data.get('regions_data', []):
+            region_name = region_data.get('region_name', region_data.get('region'))
+            region_instances = region_data.get('total_instances', 0)
+            region_ris = region_data.get('total_reserved_instances', 0)
+            region_uncovered = region_data.get('uncovered_instances', 0)
+            region_coverage = region_data.get('coverage_percentage', 0)
+            
+            # Only include regions with instances
+            if region_instances > 0:
+                region_status = "✅" if region_coverage >= 80 else "⚠️" if region_coverage >= 50 else "❌"
+                text += f"| {region_name} | {region_instances} | {region_ris} | {region_uncovered} | {region_status} {region_coverage:.1f}% |\n"
+        
+        logger.debug("Formatted enhanced message for Mattermost")
+        return text
     
-    def send_notification(self, message):
+    def send_notification(self, message_text):
         """
         Send a notification to the configured Mattermost channel.
         
         Args:
-            message (dict or str): Message content to send
+            message_text (str): Text message content to send
             
         Returns:
             bool: True if successful, False otherwise
@@ -72,31 +103,42 @@ class MattermostNotifier:
         logger.info(f"Sending notification to Mattermost channel: {self.channel}")
         
         try:
-            # Simplify message format to ensure it only contains fields supported by Mattermost
-            simplified_message = {
-                'text': message['text']
-            }
+            # Try the absolute simplest approach - plain text message
+            payload = {"text": message_text}
             
-            # Optional fields
-            if 'username' in message:
-                simplified_message['username'] = message['username']
-            if 'icon_emoji' in message:
-                simplified_message['icon_emoji'] = message['icon_emoji']
-            if 'channel' in message:
-                simplified_message['channel'] = message['channel']
+            # Log what we're sending
+            logger.debug("Sending simple text message to Mattermost webhook")
             
-            response = requests.post(
-                self.webhook_url,
-                json=simplified_message,
-                headers={'Content-Type': 'application/json'}
-            )
+            # Make direct POST with minimal formatting
+            response = requests.post(self.webhook_url, 
+                                    data=json.dumps(payload),
+                                    headers={'Content-Type': 'application/json'})
             
+            # Check response
             if response.status_code == 200:
                 logger.info("Successfully sent notification to Mattermost")
                 return True
             else:
                 logger.error(f"Failed to send notification to Mattermost: {response.status_code} {response.text}")
-                return False
+                
+                # Try curl equivalent approach as last resort
+                logger.debug("Trying curl equivalent approach")
+                
+                # Create a completely minimal payload string
+                curl_payload = '{"text":"' + message_text.replace('\n', '\\n').replace('"', '\\"') + '"}'
+                
+                curl_response = requests.post(
+                    self.webhook_url,
+                    data=curl_payload,
+                    headers={'Content-Type': 'application/json'}
+                )
+                
+                if curl_response.status_code == 200:
+                    logger.info("Successfully sent notification using curl equivalent")
+                    return True
+                else:
+                    logger.error(f"All methods failed: {curl_response.status_code} {curl_response.text}")
+                    return False
                 
         except Exception as e:
             logger.error(f"Error sending notification to Mattermost: {str(e)}")
@@ -112,5 +154,5 @@ class MattermostNotifier:
         Returns:
             bool: True if successfully sent, False otherwise
         """
-        message = self.format_ri_coverage_message(report_data)
-        return self.send_notification(message)
+        message_text = self.format_ri_coverage_message(report_data)
+        return self.send_notification(message_text)
