@@ -57,11 +57,13 @@ class MattermostNotifier:
         status_icon = "✅" if overall_coverage >= 80 else "⚠️" if overall_coverage >= 50 else "❌"
         
         # Build a nicely formatted message
-        text = "### EC2 Reserved Instance Coverage Report\n\n"
-        text += f"**Date:** {timestamp}\n\n"
+        if self.config.get('title'):
+            text = self.config['title']
+        else:
+            text = "### DevOps Notification\n\n"
         
         # Summary section with highlighting
-        text += "#### Summary\n"
+        text += "#### EC2 Reserved Instance Coverage Report\n"
         text += f"| Metric | Value |\n"
         text += f"|--------|-------|\n"
         text += f"| Running EC2 Instances | **{total_instances}** |\n"

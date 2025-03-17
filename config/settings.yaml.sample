@@ -30,6 +30,7 @@ notifications:
     enabled: true
     # Additional information for the notification
     additional_info: "For more details, please see the full report: https://wiki.example.com/aws/ri-reports"
+    title: "### DevOps Notification\n\n"
 
 # Reporting Configuration
 reporting:
