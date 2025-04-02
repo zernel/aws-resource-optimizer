@@ -14,6 +14,11 @@ from datetime import datetime
 # Add the parent directory to sys.path to allow imports from the src directory
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# Define base directory and ensure log directory exists
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+LOG_DIR = os.path.join(BASE_DIR, "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+
 from src.analyzers.ri_coverage import RICoverageAnalyzer
 from src.notifiers.mattermost import MattermostNotifier
 from src.utils import report_utils
@@ -23,7 +28,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        logging.FileHandler("logs/ri_analysis.log"),
+        logging.FileHandler(os.path.join(LOG_DIR, "ri_analysis.log")),
         logging.StreamHandler(sys.stdout)
     ]
 )
@@ -40,6 +45,10 @@ def load_config(config_path="config/settings.yaml"):
     Returns:
         dict: Configuration data
     """
+    # Use absolute path for configuration file
+    if not os.path.isabs(config_path):
+        config_path = os.path.join(BASE_DIR, config_path)
+        
     try:
         with open(config_path, 'r') as config_file:
             config = yaml.safe_load(config_file)
@@ -52,9 +61,6 @@ def load_config(config_path="config/settings.yaml"):
 def main():
     """Main execution function."""
     logger.info("Starting EC2 Reserved Instance Coverage Analysis")
-    
-    # Ensure log directory exists
-    os.makedirs("logs", exist_ok=True)
     
     # Load configuration
     config = load_config()
