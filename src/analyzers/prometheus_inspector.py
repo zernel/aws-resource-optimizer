@@ -174,9 +174,10 @@ Please provide a concise weekly inspection report in English with factual analys
    - Memory > {thresholds['mem_warning']}%
    - Disk free space < {thresholds['disk_warning']}%
 3. Identify instances with potential resource waste:
-   - Servers with very low average CPU usage (e.g., < 10-15%)
-   - Servers with very low average memory usage (e.g., < 20-30%)
-   - Analyze which instances might be over-provisioned or could be downsized/consolidated
+   - List each server only once, with all its resource waste indicators on the same line
+   - Format: Server name — CPU usage: X%, Memory usage: Y% (indicate if very low)
+   - Focus on servers with very low average CPU usage (< 10-15%) and/or very low memory usage (< 20-30%)
+   - Do not create separate categories for the same server; combine all observations for each server into a single entry
 
 Use Markdown formatting with bullet points. Keep it professional and concise.
 This is a factual analysis report only - provide observations and data analysis, but do not include actionable suggestions or recommendations. Do not offer to generate additional documents or rulesets.
