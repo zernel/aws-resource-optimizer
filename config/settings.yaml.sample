@@ -51,7 +51,7 @@ prometheus_inspection:
   
   # OpenAI Configuration
   openai_api_key: "sk-your-openai-api-key"
-  model: "gpt-4o"  # or "gpt-4", "gpt-3.5-turbo"
+  model: "gpt-5-mini"
   
   # Custom Prometheus queries (optional)
   # If not specified, default queries will be used (7-day analysis window)

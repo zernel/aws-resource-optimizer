@@ -167,16 +167,19 @@ You are an expert SRE. Below is the system performance data for the past 7 days:
 
 {raw_data_text}
 
-Please provide a concise weekly inspection report in English:
+Please provide a concise weekly inspection report in English with factual analysis only:
 1. Overall system health status (Normal/Warning/Critical).
 2. Highlight any instances with potential risks:
    - CPU > {thresholds['cpu_warning']}%
    - Memory > {thresholds['mem_warning']}%
    - Disk free space < {thresholds['disk_warning']}%
-3. Brief, actionable suggestions for maintenance or optimization.
+3. Identify instances with potential resource waste:
+   - Servers with very low average CPU usage (e.g., < 10-15%)
+   - Servers with very low average memory usage (e.g., < 20-30%)
+   - Analyze which instances might be over-provisioned or could be downsized/consolidated
 
 Use Markdown formatting with bullet points. Keep it professional and concise.
-This is a factual analysis report only - do not offer to generate additional documents or rulesets.
+This is a factual analysis report only - provide observations and data analysis, but do not include actionable suggestions or recommendations. Do not offer to generate additional documents or rulesets.
 """
         
         try:
