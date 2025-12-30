@@ -15,8 +15,8 @@ AWS Resource Optimizer is a tool designed to help DevOps teams monitor, analyze,
 - Simple overview of uncovered instances that could benefit from RI purchases
 
 ### Prometheus System Inspection (AI-Powered)
-- Automated daily system health checks using Prometheus metrics
-- AI-powered analysis of infrastructure performance over 24-hour periods
+- Automated weekly system health checks using Prometheus metrics
+- AI-powered analysis of infrastructure performance over 7-day periods
 - Monitors CPU usage, memory consumption, and disk space
 - Generates intelligent summaries with actionable recommendations
 - Automated notifications to Mattermost channels
@@ -42,8 +42,8 @@ Example crontab configuration:
 # Run EC2 RI coverage analysis every month
 0 8 1 * * cd /path/to/aws-resource-optimizer && python src/run_ri_analysis.py 2>&1
 
-# Run Prometheus system inspection daily at 9 AM
-0 9 * * * cd /path/to/aws-resource-optimizer && python src/run_prometheus_inspection.py 2>&1
+# Run Prometheus system inspection every Monday at 9 AM
+0 9 * * 1 cd /path/to/aws-resource-optimizer && python src/run_prometheus_inspection.py 2>&1
 ```
 
 ## Project Structure

@@ -32,9 +32,9 @@ prometheus_inspection:
   openai_api_key: "sk-your-actual-openai-api-key"
   model: "gpt-4o"
   
-  # Default queries are already configured, modify if needed
+  # Default queries are already configured for 7-day analysis, modify if needed
   queries:
-    cpu_usage: 'avg by (instance) (1 - rate(node_cpu_seconds_total{mode="idle"}[24h])) * 100'
+    cpu_usage: 'avg by (instance) (1 - rate(node_cpu_seconds_total{mode="idle"}[7d])) * 100'
     mem_usage: 'max by (instance) (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100'
     disk_free: 'min by (instance, mountpoint) (node_filesystem_avail_bytes{fstype=~"ext4|xfs"} / node_filesystem_size_bytes{fstype=~"ext4|xfs"}) * 100'
   
@@ -76,10 +76,10 @@ Add to your crontab:
 crontab -e
 ```
 
-Add this line for daily 9 AM execution:
+Add this line for weekly execution (every Monday at 9 AM):
 
 ```
-0 9 * * * cd /path/to/aws-resource-optimizer && /path/to/venv/bin/python src/run_prometheus_inspection.py 2>&1
+0 9 * * 1 cd /path/to/aws-resource-optimizer && /path/to/venv/bin/python src/run_prometheus_inspection.py 2>&1
 ```
 
 ## Configuration Options
@@ -170,8 +170,8 @@ Both scripts can run independently:
 # RI Analysis (monthly)
 0 8 1 * * cd /path/to/aws-resource-optimizer && python src/run_ri_analysis.py
 
-# System Inspection (daily)
-0 9 * * * cd /path/to/aws-resource-optimizer && python src/run_prometheus_inspection.py
+# System Inspection (weekly, every Monday)
+0 9 * * 1 cd /path/to/aws-resource-optimizer && python src/run_prometheus_inspection.py
 ```
 
 They share the same Mattermost configuration and can post to the same or different channels.

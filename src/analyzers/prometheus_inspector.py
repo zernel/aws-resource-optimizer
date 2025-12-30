@@ -15,9 +15,9 @@ logger = logging.getLogger(__name__)
 class PrometheusInspector:
     """Collects metrics from Prometheus and generates AI-powered inspection reports."""
     
-    # Default queries for system metrics
+    # Default queries for system metrics (7-day analysis window)
     DEFAULT_QUERIES = {
-        "cpu_usage": 'avg by (instance) (1 - rate(node_cpu_seconds_total{mode="idle"}[24h])) * 100',
+        "cpu_usage": 'avg by (instance) (1 - rate(node_cpu_seconds_total{mode="idle"}[7d])) * 100',
         "mem_usage": 'max by (instance) (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100',
         "disk_free": 'min by (instance, mountpoint) (node_filesystem_avail_bytes{fstype=~"ext4|xfs"} / node_filesystem_size_bytes{fstype=~"ext4|xfs"}) * 100'
     }
@@ -163,19 +163,20 @@ class PrometheusInspector:
         
         thresholds = self.thresholds
         prompt = f"""
-You are an expert SRE. Below is the system performance data for the last 24 hours:
+You are an expert SRE. Below is the system performance data for the past 7 days:
 
 {raw_data_text}
 
-Please provide a concise daily inspection report in English:
+Please provide a concise weekly inspection report in English:
 1. Overall system health status (Normal/Warning/Critical).
 2. Highlight any instances with potential risks:
    - CPU > {thresholds['cpu_warning']}%
    - Memory > {thresholds['mem_warning']}%
    - Disk free space < {thresholds['disk_warning']}%
-3. Brief suggestions for maintenance or optimization.
+3. Brief, actionable suggestions for maintenance or optimization.
 
 Use Markdown formatting with bullet points. Keep it professional and concise.
+This is a factual analysis report only - do not offer to generate additional documents or rulesets.
 """
         
         try:

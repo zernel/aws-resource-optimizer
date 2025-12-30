@@ -54,9 +54,9 @@ prometheus_inspection:
   model: "gpt-4o"  # or "gpt-4", "gpt-3.5-turbo"
   
   # Custom Prometheus queries (optional)
-  # If not specified, default queries will be used
+  # If not specified, default queries will be used (7-day analysis window)
   queries:
-    cpu_usage: 'avg by (instance) (1 - rate(node_cpu_seconds_total{mode="idle"}[24h])) * 100'
+    cpu_usage: 'avg by (instance) (1 - rate(node_cpu_seconds_total{mode="idle"}[7d])) * 100'
     mem_usage: 'max by (instance) (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100'
     disk_free: 'min by (instance, mountpoint) (node_filesystem_avail_bytes{fstype=~"ext4|xfs"} / node_filesystem_size_bytes{fstype=~"ext4|xfs"}) * 100'
   

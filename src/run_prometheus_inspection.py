@@ -2,7 +2,8 @@
 Prometheus System Inspection Runner
 
 This is the main entry point for running Prometheus system inspections.
-It collects metrics, generates AI-powered reports, and sends notifications.
+It collects metrics over the past 7 days, generates AI-powered reports, 
+and sends notifications. Designed to run weekly.
 """
 
 import os
