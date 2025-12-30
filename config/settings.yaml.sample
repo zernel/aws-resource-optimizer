@@ -40,3 +40,28 @@ reporting:
     - html
   # Directory to store reports (relative to project root)
   output_dir: "reports"
+
+# Prometheus System Inspection Configuration
+prometheus_inspection:
+  # Option 1: Direct URL to Prometheus server
+  prometheus_url: "http://localhost:9090"
+  
+  # Option 2: Docker container name (will auto-detect IP)
+  # container_name: "prometheus"
+  
+  # OpenAI Configuration
+  openai_api_key: "sk-your-openai-api-key"
+  model: "gpt-4o"  # or "gpt-4", "gpt-3.5-turbo"
+  
+  # Custom Prometheus queries (optional)
+  # If not specified, default queries will be used
+  queries:
+    cpu_usage: 'avg by (instance) (1 - rate(node_cpu_seconds_total{mode="idle"}[24h])) * 100'
+    mem_usage: 'max by (instance) (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100'
+    disk_free: 'min by (instance, mountpoint) (node_filesystem_avail_bytes{fstype=~"ext4|xfs"} / node_filesystem_size_bytes{fstype=~"ext4|xfs"}) * 100'
+  
+  # Thresholds for warnings
+  thresholds:
+    cpu_warning: 80     # CPU usage percentage
+    mem_warning: 90     # Memory usage percentage
+    disk_warning: 15    # Disk free space percentage

@@ -11,3 +11,6 @@ pyyaml>=6.0
 
 # HTTP requests for notifications
 requests>=2.31.0
+
+# OpenAI for AI-powered analysis
+openai>=1.0.0

@@ -14,11 +14,20 @@ AWS Resource Optimizer is a tool designed to help DevOps teams monitor, analyze,
 - Automated notifications to Mattermost channels
 - Simple overview of uncovered instances that could benefit from RI purchases
 
+### Prometheus System Inspection (AI-Powered)
+- Automated daily system health checks using Prometheus metrics
+- AI-powered analysis of infrastructure performance over 24-hour periods
+- Monitors CPU usage, memory consumption, and disk space
+- Generates intelligent summaries with actionable recommendations
+- Automated notifications to Mattermost channels
+
 ## Setup
 
 ### Prerequisites
 - Python 3.8+
-- AWS CLI configured with appropriate permissions
+- AWS CLI configured with appropriate permissions (for RI analysis)
+- Prometheus server (for system inspection)
+- OpenAI API key (for AI-powered analysis)
 - Server with crontab access
 - Network access to Mattermost servers
 
@@ -32,31 +41,38 @@ Example crontab configuration:
 ```
 # Run EC2 RI coverage analysis every month
 0 8 1 * * cd /path/to/aws-resource-optimizer && python src/run_ri_analysis.py 2>&1
+
+# Run Prometheus system inspection daily at 9 AM
+0 9 * * * cd /path/to/aws-resource-optimizer && python src/run_prometheus_inspection.py 2>&1
 ```
 
 ## Project Structure
 ```
 aws-resource-optimizer/
 ├── src/
-│   ├── analyzers/              # Analysis modules
-│   │   └── ri_coverage.py      # RI coverage analyzer
+│   ├── analyzers/                      # Analysis modules
+│   │   ├── ri_coverage.py              # RI coverage analyzer
+│   │   └── prometheus_inspector.py     # Prometheus system inspector
 │   ├── notifiers/
-│   │   └── mattermost.py       # Mattermost notification handler
-│   ├── utils/                  # Utility functions
-│   │   ├── aws_utils.py        # AWS API helpers
-│   │   └── report_utils.py     # Reporting helpers
-│   └── run_ri_analysis.py      # Main entry point for RI analysis
+│   │   └── mattermost.py               # Mattermost notification handler
+│   ├── utils/                          # Utility functions
+│   │   ├── aws_utils.py                # AWS API helpers
+│   │   └── report_utils.py             # Reporting helpers
+│   ├── run_ri_analysis.py              # Main entry point for RI analysis
+│   └── run_prometheus_inspection.py    # Main entry point for Prometheus inspection
 ├── config/
-│   └── settings.yaml           # Configuration file
-├── reports/                    # Directory for generated reports
-├── logs/                       # Log files
-├── requirements.txt            # Python dependencies
+│   └── settings.yaml                   # Configuration file
+├── reports/                            # Directory for generated reports
+├── logs/                               # Log files
+├── requirements.txt                    # Python dependencies
 └── README.md
 ```
 
 ## Technologies
 
-- Python with Boto3 (AWS SDK)
+- Python with Boto3 (AWS SDK) for AWS resource management
+- Prometheus for infrastructure metrics collection
+- OpenAI GPT models for intelligent analysis
 - Local file system for storing reports and logs
 - Crontab for task scheduling
 - Mattermost webhooks for notifications
