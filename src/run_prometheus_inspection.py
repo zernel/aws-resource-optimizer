@@ -81,12 +81,8 @@ def main():
         if config['notifications'].get('mattermost', {}).get('enabled', False):
             notifier = MattermostNotifier(config['notifications']['mattermost'])
             
-            # Format message for Mattermost
-            message = "## 🛡️ Infrastructure Daily Report\n---\n"
-            message += report_data['ai_summary']
-            
-            # Send the notification
-            success = notifier.send_notification(message)
+            # Send formatted Prometheus report
+            success = notifier.send_prometheus_report(report_data)
             
             if success:
                 logger.info("Successfully sent notification to Mattermost")

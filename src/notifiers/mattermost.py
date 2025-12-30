@@ -159,6 +159,68 @@ class MattermostNotifier:
             logger.error(f"Error sending notification to Mattermost: {str(e)}")
             return False
         
+    def send_attachment(self, title, content, color="good", icon_emoji=None):
+        """
+        Send a formatted notification with attachment to Mattermost.
+        
+        Args:
+            title (str): Message title
+            content (str): Message content (markdown supported)
+            color (str): Attachment color - "good" for normal, "danger" for error, "warning" for warning
+            icon_emoji (str): Optional emoji override for this message
+            
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        if not self.enabled:
+            logger.info("Mattermost notifications are disabled in configuration")
+            return False
+        
+        logger.info(f"Sending formatted notification to Mattermost channel: {self.channel}")
+        
+        # Map color names
+        color_map = {
+            "green": "good",
+            "red": "danger",
+            "orange": "warning",
+            "yellow": "warning"
+        }
+        mattermost_color = color_map.get(color, color)
+        
+        # Prepare payload with attachment
+        payload = {
+            "username": self.username,
+            "icon_emoji": icon_emoji or self.icon_emoji,
+            "attachments": [
+                {
+                    "color": mattermost_color,
+                    "title": title,
+                    "text": content,
+                    "mrkdwn_in": ["text"]
+                }
+            ]
+        }
+        
+        try:
+            response = requests.post(
+                self.webhook_url,
+                json=payload,
+                headers={'Content-Type': 'application/json'},
+                timeout=10
+            )
+            response.raise_for_status()
+            
+            if response.status_code == 200:
+                logger.info("Successfully sent formatted notification to Mattermost")
+                return True
+            else:
+                logger.error(f"Failed to send notification: {response.status_code} {response.text}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error sending formatted notification to Mattermost: {str(e)}")
+            return False
+    
     def send_ri_report(self, report_data):
         """
         Create and send an RI coverage report notification.
@@ -171,3 +233,36 @@ class MattermostNotifier:
         """
         message_text = self.format_ri_coverage_message(report_data)
         return self.send_notification(message_text)
+    
+    def send_prometheus_report(self, report_data):
+        """
+        Send a Prometheus inspection report notification with formatted attachment.
+        
+        Args:
+            report_data (dict): The inspection report data containing:
+                - metrics_count: Number of metrics collected
+                - ai_summary: AI-generated summary text
+                
+        Returns:
+            bool: True if successfully sent, False otherwise
+        """
+        metrics_count = report_data.get('metrics_count', 0)
+        ai_summary = report_data.get('ai_summary', '')
+        
+        # Determine color based on health status
+        color = "good"  # default: green
+        if 'Critical' in ai_summary:
+            color = "danger"  # red
+        elif 'Warning' in ai_summary:
+            color = "warning"  # yellow
+        
+        # Format title
+        title = f"🛡️ Infrastructure Weekly Report ({metrics_count} metrics analyzed)"
+        
+        # Send with attachment format
+        return self.send_attachment(
+            title=title,
+            content=ai_summary,
+            color=color,
+            icon_emoji=":bar_chart:"
+        )
